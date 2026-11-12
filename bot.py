@@ -26,7 +26,16 @@ logger = logging.getLogger("DiscordSetupBot")
 
 # Lightweight web server to satisfy cloud health checks (Render, Koyeb, etc.)
 async def handle_health_check(request):
-    return web.Response(text="Prime Studios Discord Bot is online and running 24/7!", status=200)
+    user_str = str(bot.user) if bot.user else "Connecting..."
+    latency_ms = round(bot.latency * 1000) if bot.latency else 0
+    guilds_count = len(bot.guilds)
+    text = (
+        f"🟢 Prime Studios Discord Bot is ONLINE 24/7!\n"
+        f"Bot: {user_str}\n"
+        f"Connected Guilds: {guilds_count}\n"
+        f"Gateway Latency: {latency_ms}ms\n"
+    )
+    return web.Response(text=text, status=200)
 
 async def run_web_server():
     app = web.Application()
