@@ -12,6 +12,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
+from aiohttp import web
 
 from templates import TEMPLATES, RECOMMENDED_BOTS, MANUAL_ACTIONS_GUIDE
 
@@ -22,6 +23,22 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger("DiscordSetupBot")
+
+# Lightweight web server to satisfy cloud health checks (Render, Koyeb, etc.)
+async def handle_health_check(request):
+    return web.Response(text="Prime Studios Discord Bot is online and running 24/7!", status=200)
+
+async def run_web_server():
+    app = web.Application()
+    app.router.add_get("/", handle_health_check)
+    app.router.add_get("/health", handle_health_check)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logger.info(f"Web health check server running on port {port}")
+
 
 # Load environment variables
 load_dotenv()
@@ -69,6 +86,12 @@ async def on_ready():
             logger.info(f"Synced {len(synced)} global slash commands")
     except Exception as e:
         logger.error(f"Error syncing slash commands: {e}")
+
+    # Start health check web server for Render / Cloud hosting
+    try:
+        await run_web_server()
+    except Exception as e:
+        logger.warning(f"Could not start web server: {e}")
 
     await bot.change_presence(
         activity=discord.Activity(
