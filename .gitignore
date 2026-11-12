@@ -1,0 +1,23 @@
+# Environment variables & secrets (NEVER COMMIT)
+.env
+.env.local
+.env.*
+!.env.example
+
+# Python virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+
+# OS & IDE metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
